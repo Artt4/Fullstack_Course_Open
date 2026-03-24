@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant browser
     participant server
@@ -10,3 +11,4 @@ sequenceDiagram
     Note left of server: Server saves the note to the database
     server-->>browser: HTTP 201 Created (JSON: {"message":"note created"})
     deactivate server
+```

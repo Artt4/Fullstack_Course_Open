@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant browser
     participant server
@@ -19,7 +20,7 @@ sequenceDiagram
     activate server
     server-->>browser: the CSS file
     deactivate server
-
+    
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
     activate server
     server-->>browser: the JavaScript files
@@ -31,3 +32,4 @@ sequenceDiagram
     deactivate server
 
     Note right of browser: Browser executes the callback and renders the new list
+```
