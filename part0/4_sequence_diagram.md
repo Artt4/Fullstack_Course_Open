@@ -1,4 +1,3 @@
-:::mermaid
 sequenceDiagram
     participant browser
     participant server
@@ -32,4 +31,3 @@ sequenceDiagram
     deactivate server
 
     Note right of browser: Browser executes the callback and renders the new list
-:::
