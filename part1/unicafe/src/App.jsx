@@ -12,6 +12,10 @@ const App = () => {
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
 
+  const allRatings = good + neutral + bad;
+  const average = (good - bad) / allRatings || 0;
+  const positive = (good / allRatings) * 100 || 0;
+
   const handleGood = () => {
     setGood(good + 1);
   };
@@ -32,6 +36,9 @@ const App = () => {
       <Display rating="good" value={good} />
       <Display rating="neutral" value={neutral} />
       <Display rating="bad" value={bad} />
+      <Display rating="all" value={allRatings} />
+      <Display rating="average" value={average} />
+      <Display rating="positive" value={positive + " %"} />
     </div>
   );
 };
