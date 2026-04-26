@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import personService from "./services/persons";
 
 const Filter = ({ value, onChange }) => {
   return (
@@ -32,12 +33,13 @@ const PersonForm = ({
   );
 };
 
-const Persons = ({ persons }) => {
+const Persons = ({ persons, buttonDelete }) => {
   return (
     <div>
       {persons.map((person) => (
         <div key={person.name}>
           {person.name} {person.number}
+          <button onClick={() => buttonDelete(person.id)}>delete</button>
         </div>
       ))}
     </div>
@@ -51,14 +53,20 @@ const App = () => {
   const [filterValue, setNewFilter] = useState("");
 
   useEffect(() => {
-    console.log("effect");
-    axios.get("http://localhost:3001/persons").then((response) => {
-      console.log("promise fulfilled");
+    personService.getAll().then((response) => {
       setPersons(response.data);
     });
   }, []);
 
   console.log("render", persons.length, "persons");
+
+  const deletePerson = (id) => {
+    if (window.confirm("Delete this person?")) {
+      personService.remove(id).then(() => {
+        setPersons(persons.filter((person) => person.id !== id));
+      });
+    }
+  };
 
   const handlePersonChange = (event) => {
     console.log(event.target.value);
@@ -68,7 +76,6 @@ const App = () => {
     console.log(event.target.value);
     setNewNumber(event.target.value);
   };
-
   const handleFilterChange = (event) => {
     console.log(event.target.value);
     setNewFilter(event.target.value);
@@ -89,9 +96,11 @@ const App = () => {
       const alertMessage = `${newName} is already added to the phonebook`;
       alert(alertMessage);
     } else {
-      setPersons(persons.concat(personObject));
-      setNewName("");
-      setNewNumber("");
+      personService.create(personObject).then((response) => {
+        setPersons(persons.concat(response.data));
+        setNewName("");
+        setNewNumber("");
+      });
     }
   };
 
@@ -108,7 +117,7 @@ const App = () => {
         numberOnChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} buttonDelete={deletePerson} />
     </div>
   );
 };
