@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import personService from "./services/persons";
 
 const Filter = ({ value, onChange }) => {
@@ -38,7 +37,7 @@ const Persons = ({ persons, buttonDelete }) => {
     <div>
       {persons.map((person) => (
         <div key={person.name}>
-          {person.name} {person.number}
+          {person.name} {person.number}{" "}
           <button onClick={() => buttonDelete(person.id)}>delete</button>
         </div>
       ))}
@@ -53,8 +52,8 @@ const App = () => {
   const [filterValue, setNewFilter] = useState("");
 
   useEffect(() => {
-    personService.getAll().then((response) => {
-      setPersons(response.data);
+    personService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
     });
   }, []);
 
@@ -92,12 +91,34 @@ const App = () => {
       number: newNumber,
       id: String(persons.length + 1),
     };
-    if (persons.some((person) => person.name === newName)) {
-      const alertMessage = `${newName} is already added to the phonebook`;
-      alert(alertMessage);
+    const existingPerson = persons.find((person) => person.name === newName);
+
+    if (existingPerson && existingPerson.number != newNumber) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook. Replace the old number with a new one?`,
+        )
+      ) {
+        const changedPerson = { ...existingPerson, number: newNumber };
+        personService
+          .update(existingPerson.id, changedPerson)
+          .then((returnedPerson) => {
+            setPersons(
+              persons.map((p) =>
+                p.id === existingPerson.id ? returnedPerson : p,
+              ),
+            );
+            setNewName("");
+            setNewNumber("");
+          });
+      }
+    } else if (existingPerson && existingPerson.number === newNumber) {
+      return alert(
+        `${newName} is already added to phonebook with the same number`,
+      );
     } else {
-      personService.create(personObject).then((response) => {
-        setPersons(persons.concat(response.data));
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
         setNewName("");
         setNewNumber("");
       });
