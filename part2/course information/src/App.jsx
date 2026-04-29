@@ -1,41 +1,58 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import Course from "./components/Course";
 
 const App = () => {
-  const [value, setValue] = useState("");
-  const [rates, setRates] = useState({});
-  const [currency, setCurrency] = useState(null);
-
-  useEffect(() => {
-    console.log("effect run, currency is now", currency);
-
-    // skip if currency is not defined
-    if (currency) {
-      console.log("fetching exchange rates...");
-      axios
-        .get(`https://open.er-api.com/v6/latest/${currency}`)
-        .then((response) => {
-          setRates(response.data.rates);
-        });
-    }
-  }, [currency]);
-
-  const handleChange = (event) => {
-    setValue(event.target.value);
-  };
-
-  const onSearch = (event) => {
-    event.preventDefault();
-    setCurrency(value);
-  };
+  const courses = [
+    {
+      name: "Half Stack application development",
+      id: 1,
+      parts: [
+        {
+          name: "Fundamentals of React",
+          exercises: 10,
+          id: 1,
+        },
+        {
+          name: "Using props to pass data",
+          exercises: 7,
+          id: 2,
+        },
+        {
+          name: "State of a component",
+          exercises: 14,
+          id: 3,
+        },
+        {
+          name: "Redux",
+          exercises: 11,
+          id: 4,
+        },
+      ],
+    },
+    {
+      name: "Node.js",
+      id: 2,
+      parts: [
+        {
+          name: "Routing",
+          exercises: 3,
+          id: 1,
+        },
+        {
+          name: "Middlewares",
+          exercises: 7,
+          id: 2,
+        },
+      ],
+    },
+  ];
 
   return (
     <div>
-      <form onSubmit={onSearch}>
-        currency: <input value={value} onChange={handleChange} />
-        <button type="submit">exchange rate</button>
-      </form>
-      <pre>{JSON.stringify(rates, null, 2)}</pre>
+      {courses.map((course) => (
+        <div key={course.id}>
+          <Course course={course} />
+        </div>
+      ))}
     </div>
   );
 };
