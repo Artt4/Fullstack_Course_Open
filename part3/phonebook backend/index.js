@@ -1,7 +1,17 @@
 const express = require("express");
 const app = express();
+const morgan = require("morgan");
+
+morgan.token("post", function (req, res) {
+  if (req.method === "POST") {
+    return JSON.stringify(req.body);
+  }
+});
 
 app.use(express.json());
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :post"),
+);
 
 let persons = [
   {
@@ -52,15 +62,6 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
-const info = (persons) => {
-  const length = persons.length;
-  const date = new Date();
-  return `<div>
-      <p>Phonebook has info for ${length} people</p>
-      <p>${date}</p>
-    </div>`;
-};
-
 app.post("/api/persons/", (request, response) => {
   const body = request.body;
   const duplicate = persons.some((person) => person.name === body.name);
@@ -78,9 +79,17 @@ app.post("/api/persons/", (request, response) => {
   };
 
   persons = persons.concat(person);
-
   response.json(person);
 });
+
+const info = (persons) => {
+  const length = persons.length;
+  const date = new Date();
+  return `<div>
+      <p>Phonebook has info for ${length} people</p>
+      <p>${date}</p>
+    </div>`;
+};
 
 const generateId = () => {
   return String(Math.floor(Math.random() * 1000000));
