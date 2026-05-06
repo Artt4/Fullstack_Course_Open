@@ -1,0 +1,16 @@
+{
+  "name": "cli-database",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "Artturi Siven",
+  "type": "commonjs",
+  "main": "mongo.js",
+  "scripts": {
+    "start": "node mongo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "mongoose": "^9.6.1"
+  }
+}
