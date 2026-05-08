@@ -133,15 +133,24 @@ const App = () => {
         `${newName} is already added to phonebook with the same number`,
       );
     } else {
-      personService.create(personObject).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
-        setNewName("");
-        setNewNumber("");
-        setAddMessage(`Added ${newName}`);
-        setTimeout(() => {
-          setAddMessage(null);
-        }, 5000);
-      });
+      personService
+        .create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+          setNewName("");
+          setNewNumber("");
+          setAddMessage(`Added ${newName}`);
+          setTimeout(() => {
+            setAddMessage(null);
+          }, 5000);
+        })
+        .catch((error) => {
+          console.log(error.response.data.error);
+          setErrorMessage(error.response.data.error);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
     }
   };
 

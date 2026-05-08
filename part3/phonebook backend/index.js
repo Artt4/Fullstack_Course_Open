@@ -108,6 +108,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    const cleanMessage = Object.values(error.errors)[0].message;
+    return response.status(400).json({ error: cleanMessage });
   }
 
   next(error);
