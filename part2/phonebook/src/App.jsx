@@ -119,13 +119,14 @@ const App = () => {
             }, 5000);
           })
           .catch((error) => {
-            setErrorMessage(
-              `Information of ${newName} was already deleted from server`,
-            );
-            setTimeout(() => {
-              setErrorMessage(null);
-            }, 5000);
-            setPersons(persons.filter((n) => n.id !== existingPerson.id));
+            if (error.response.status === 404) {
+              setErrorMessage(`Information of ${newName} was already deleted from server`);
+              setTimeout(() => setErrorMessage(null), 5000);
+              setPersons(persons.filter((n) => n.id !== existingPerson.id));
+            } else {
+              setErrorMessage(error.response.data.error);
+              setTimeout(() => setErrorMessage(null), 5000);
+            }
           });
       }
     } else if (existingPerson && existingPerson.number === newNumber) {
