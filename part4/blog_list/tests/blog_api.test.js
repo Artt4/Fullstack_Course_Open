@@ -38,6 +38,12 @@ test.only('blogs are returned as json and correct amount is returned', async () 
   assert.strictEqual(response.body.length, 2)
 })
 
+test.only('blog identifier is named "id"', async () => {
+  const response = await api
+    .get('/api/blogs')
+  assert.strictEqual(response.body[0].hasOwnProperty('id'), true)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
