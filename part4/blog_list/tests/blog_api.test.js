@@ -30,7 +30,7 @@ beforeEach(async () => {
   await blogObject.save()
 })
 
-test.only('blogs are returned as json and correct amount is returned', async () => {
+test('blogs are returned as json and correct amount is returned', async () => {
   const response = await api
     .get('/api/blogs')
     .expect(200)
@@ -38,11 +38,37 @@ test.only('blogs are returned as json and correct amount is returned', async () 
   assert.strictEqual(response.body.length, 2)
 })
 
-test.only('blog identifier is named "id"', async () => {
+test('blog identifier is named "id"', async () => {
   const response = await api
     .get('/api/blogs')
   assert.strictEqual(response.body[0].hasOwnProperty('id'), true)
 })
+
+test.only('a valid blog can be added ', async () => {
+  const newBlog = {
+    title: 'adding new blog test',
+    author: 'Michael Chan',
+    url: 'https://reactpatterns.com/',
+    likes: 3
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, initialBlogs.length + 1)
+
+  const titles = blogsAtEnd.map(n => n.title)
+  assert(titles.includes('adding new blog test'))
+})
+
+const blogsInDb = async () => {
+  const blogs = await Blog.find({})
+  return blogs.map(blog => blog.toJSON())
+}
 
 after(async () => {
   await mongoose.connection.close()
