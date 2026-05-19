@@ -44,7 +44,7 @@ test('blog identifier is named "id"', async () => {
   assert.strictEqual(response.body[0].hasOwnProperty('id'), true)
 })
 
-test.only('a valid blog can be added ', async () => {
+test('a valid blog can be added ', async () => {
   const newBlog = {
     title: 'adding new blog test',
     author: 'Michael Chan',
@@ -63,6 +63,45 @@ test.only('a valid blog can be added ', async () => {
 
   const titles = blogsAtEnd.map(n => n.title)
   assert(titles.includes('adding new blog test'))
+})
+
+test('blogs without likes default to include 0 likes', async () => {
+  const newBlog = {
+    title: 'Blog without likes',
+    author: 'Michael Chan',
+    url: 'https://reactpatterns.com/',
+  }
+  const response = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+
+  assert.strictEqual(response.body.likes, 0)
+})
+
+test('blog wihtout title returns 400', async () => {
+  const newBlog = {
+    author: 'Michael Chan',
+    url: 'https://reactpatterns.com/',
+    likes: 0
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+
+})
+
+test('blog wihtout url returns 400', async () => {
+  const newBlog = {
+    author: 'React patterns',
+    title: 'Michael Chan',
+    likes: 0
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
 })
 
 const blogsInDb = async () => {
