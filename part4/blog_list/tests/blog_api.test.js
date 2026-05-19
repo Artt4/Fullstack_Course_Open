@@ -89,7 +89,6 @@ test('blog wihtout title returns 400', async () => {
     .post('/api/blogs')
     .send(newBlog)
     .expect(400)
-
 })
 
 test('blog wihtout url returns 400', async () => {
@@ -102,6 +101,40 @@ test('blog wihtout url returns 400', async () => {
     .post('/api/blogs')
     .send(newBlog)
     .expect(400)
+})
+
+test('a blog can be deleted', async () => {
+  const blogsAtStart = await blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+
+  const blogsAtEnd = await blogsInDb()
+
+  const ids = blogsAtEnd.map(n => n.id)
+  assert(!ids.includes(blogToDelete.id))
+
+  assert.strictEqual(blogsAtEnd.length, initialBlogs.length - 1)
+})
+
+test('a blog can be updated', async () => {
+  const blogsAtStart = await blogsInDb()
+  const blogToUpdate = blogsAtStart[0]
+  const updatedLikes = { likes: blogToUpdate.likes + 10 }
+
+  const response = await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(updatedLikes)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  assert.strictEqual(response.body.likes, blogToUpdate.likes + 10)
+
+  const blogsAtEnd = await blogsInDb()
+  const updatedBlog = blogsAtEnd.find(b => b.id === blogToUpdate.id)
+  assert.strictEqual(updatedBlog.likes, blogToUpdate.likes + 10)
 })
 
 const blogsInDb = async () => {
