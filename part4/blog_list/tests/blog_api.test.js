@@ -2,8 +2,11 @@ const { test, after, beforeEach } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
 
 const api = supertest(app)
 
@@ -12,7 +15,7 @@ const initialBlogs = [
     title: 'React patterns',
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
-    likes: 7
+    likes: 7,
   },
   {
     title: 'Go To Statement Considered Harmful',
@@ -22,11 +25,20 @@ const initialBlogs = [
   }
 ]
 
+let testUserId
+
 beforeEach(async () => {
   await Blog.deleteMany({})
-  let blogObject = new Blog(initialBlogs[0])
+  await User.deleteMany({})
+
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  const savedUser = await user.save()
+  testUserId = savedUser.id
+
+  let blogObject = new Blog({ ...initialBlogs[0], user: savedUser._id })
   await blogObject.save()
-  blogObject = new Blog(initialBlogs[1])
+  blogObject = new Blog({ ...initialBlogs[1], user: savedUser._id })
   await blogObject.save()
 })
 
@@ -45,6 +57,7 @@ test('blog identifier is named "id"', async () => {
 })
 
 test('a valid blog can be added ', async () => {
+  const token = await getToken()
   const newBlog = {
     title: 'adding new blog test',
     author: 'Michael Chan',
@@ -54,6 +67,7 @@ test('a valid blog can be added ', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -66,6 +80,7 @@ test('a valid blog can be added ', async () => {
 })
 
 test('blogs without likes default to include 0 likes', async () => {
+  const token = await getToken()
   const newBlog = {
     title: 'Blog without likes',
     author: 'Michael Chan',
@@ -73,6 +88,7 @@ test('blogs without likes default to include 0 likes', async () => {
   }
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
 
@@ -80,6 +96,7 @@ test('blogs without likes default to include 0 likes', async () => {
 })
 
 test('blog wihtout title returns 400', async () => {
+  const token = await getToken()
   const newBlog = {
     author: 'Michael Chan',
     url: 'https://reactpatterns.com/',
@@ -87,11 +104,13 @@ test('blog wihtout title returns 400', async () => {
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 })
 
 test('blog wihtout url returns 400', async () => {
+  const token = await getToken()
   const newBlog = {
     author: 'React patterns',
     title: 'Michael Chan',
@@ -99,16 +118,19 @@ test('blog wihtout url returns 400', async () => {
   }
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 })
 
 test('a blog can be deleted', async () => {
+  const token = await getToken()
   const blogsAtStart = await blogsInDb()
   const blogToDelete = blogsAtStart[0]
 
   await api
     .delete(`/api/blogs/${blogToDelete.id}`)
+    .set('Authorization', `Bearer ${token}`)
     .expect(204)
 
   const blogsAtEnd = await blogsInDb()
@@ -117,6 +139,27 @@ test('a blog can be deleted', async () => {
   assert(!ids.includes(blogToDelete.id))
 
   assert.strictEqual(blogsAtEnd.length, initialBlogs.length - 1)
+})
+
+test('deleting a blog fails if user is not the creator', async () => {
+  const passwordHash = await bcrypt.hash('salasana', 10)
+
+  const otherUser = new User({ username: 'otheruser', passwordHash })
+  await otherUser.save()
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: 'otheruser', password: 'salasana' })
+  const wrongToken = loginResponse.body.token
+
+  const blogsAtStart = await blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .set('Authorization', `Bearer ${wrongToken}`)
+    .expect(401)
+
+  const blogsAtEnd = await blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
 })
 
 test('a blog can be updated', async () => {
@@ -137,9 +180,29 @@ test('a blog can be updated', async () => {
   assert.strictEqual(updatedBlog.likes, blogToUpdate.likes + 10)
 })
 
+test('adding a blog fails with the proper status code 401 Unauthorized if a token is not provided', async () => {
+  const newBlog = {
+    title: 'unauthorized blog',
+    author: 'me',
+    url: 'http://example.com',
+    likes: 0
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+})
+
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
   return blogs.map(blog => blog.toJSON())
+}
+
+const getToken = async () => {
+  const response = await api
+    .post('/api/login')
+    .send({ username: 'root', password: 'sekret' })
+  return response.body.token
 }
 
 after(async () => {
