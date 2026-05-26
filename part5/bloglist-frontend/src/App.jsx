@@ -33,7 +33,7 @@ const App = () => {
   }, [])
 
   const loginForm = () => (
-    <div buttonLabel="login">
+    <div>
       <LoginForm
         username={username}
         password={password}
