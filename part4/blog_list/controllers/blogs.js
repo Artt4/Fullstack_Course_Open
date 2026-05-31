@@ -34,19 +34,24 @@ blogsRouter.post('/', async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.put('/:id', async (request, response, next) => {
-  const { likes } = request.body
+blogsRouter.put('/:id', async (request, response) => {
+  const { title, author, url, likes, user } = request.body
 
-  const blog = await Blog.findById(request.params.id)
-  if (!blog) {
-    return response.status(404).end()
+  const blog = {
+    title,
+    author,
+    url,
+    likes,
+    user: typeof user === 'object' ? user.id : user
   }
-  if (likes !== undefined) {
-    blog.likes = likes
-  }
-  const updatedBlog = await blog.save()
-  response.json(updatedBlog)
 
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true, runValidators: true, context: 'query' }).populate('user')
+  
+  if (updatedBlog) {
+    response.json(updatedBlog)
+  } else {
+    response.status(404).end()
+  }
 })
 
 blogsRouter.delete('/:id', async (request, response, next) => {
