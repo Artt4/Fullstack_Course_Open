@@ -18,9 +18,11 @@ const App = () => {
   const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(initialNotes => {
-      setBlogs(initialNotes)
-    })
+    const fetchBlogs = async () => {
+      const initialBlogs = await blogService.getAll()
+      setBlogs(initialBlogs)
+    }
+    fetchBlogs()
   }, [])
 
   useEffect(() => {
@@ -70,23 +72,21 @@ const App = () => {
     blogService.setToken(null)
   }
 
-  const addBlog = blogObject => {
+  const addBlog = async blogObject => {
     blogFormRef.current.toggleVisibility()
-    blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-        setSuccessMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
-        setTimeout(() => {
-          setSuccessMessage(null)
-        }, 5000)
-      })
-      .catch(error => {
-        setErrorMessage(error.response.data.error)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
+    try {
+      const returnedBlog = await blogService.create(blogObject)
+      setBlogs(blogs.concat(returnedBlog))
+      setSuccessMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
+    } catch (error) {
+      setErrorMessage(error.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
   }
 
   const updateBlog = async (id, blogObject) => {
