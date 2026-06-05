@@ -36,11 +36,11 @@ const Blog = ({ blog, updateBlog, removeBlog, currentUser }) => {
   const showRemoveButton = blog.user && currentUser && blog.user.username === currentUser.username
 
   return (
-    <div style={blogStyle}>
-      <div style={hideWhenVisible}>
+    <div style={blogStyle} className='blog'>
+      <div style={hideWhenVisible} className='blog-summary'>
         {blog.title} {blog.author} <button onClick={toggleVisibility}>view</button>
       </div>
-      <div style={showWhenVisible}>
+      <div style={showWhenVisible} className='blog-detailed'>
         <div>
           {blog.title} {blog.author} <button onClick={toggleVisibility}>hide</button>
         </div>
