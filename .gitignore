@@ -2,3 +2,4 @@ node_modules
 part1/course lecture/
 */notes/
 .env
+coverage/
