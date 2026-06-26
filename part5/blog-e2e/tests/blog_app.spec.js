@@ -83,6 +83,51 @@ describe('Blog app', () => {
         await page.getByRole('button', { name: 'like' }).click()
         await expect(page.getByText('likes 1')).toBeVisible()
       })
+
+      test('a blog can be deleted by its creator', async ({ page }) => {
+        page.on('dialog', dialog => dialog.accept())
+
+        await page.getByRole('button', { name: 'view' }).click()
+        await page.getByRole('button', { name: 'remove' }).click()
+
+        await expect(page.locator('.blog-summary')).toHaveCount(0)
+      })
+    })
+  })
+
+  describe('When logged in as a different user', () => {
+    beforeEach(async ({ page, request }) => {
+      await request.post('http://localhost:3003/api/users', {
+        data: {
+          username: 'OtherUser',
+          name: 'Other User',
+          password: '5678'
+        }
+      })
+
+      const response = await request.post('http://localhost:3003/api/login', {
+        data: { username: 'Artt', password: '1234' }
+      })
+      const { token } = await response.json()
+
+      await request.post('http://localhost:3003/api/blogs', {
+        data: {
+          title: 'Test blog for ownership',
+          author: 'Test Author',
+          url: 'http://test.com',
+          likes: 0
+        },
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      await page.goto('http://localhost:5173')
+      await loginWith(page, 'OtherUser', '5678')
+    })
+
+    test('only the creator sees the remove button', async ({ page }) => {
+      await page.getByRole('button', { name: 'view' }).click()
+
+      await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
     })
   })
 })
