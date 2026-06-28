@@ -93,6 +93,38 @@ describe('Blog app', () => {
         await expect(page.locator('.blog-summary')).toHaveCount(0)
       })
     })
+
+    describe('and several blogs exist', () => {
+      beforeEach(async ({ page, request }) => {
+        const response = await request.post('http://localhost:3003/api/login', {
+          data: { username: 'Artt', password: '1234' }
+        })
+        const { token } = await response.json()
+
+        const blogs = [
+          { title: 'Least liked blog', author: 'Author A', url: 'http://a.com', likes: 1 },
+          { title: 'Most liked blog', author: 'Author B', url: 'http://b.com', likes: 10 },
+          { title: 'Medium liked blog', author: 'Author C', url: 'http://c.com', likes: 5 }
+        ]
+
+        for (const blog of blogs) {
+          await request.post('http://localhost:3003/api/blogs', {
+            data: blog,
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        }
+
+        await page.goto('http://localhost:5173')
+      })
+
+      test('blogs are sorted by likes, most liked first', async ({ page }) => {
+        const blogElements = page.locator('.blog-summary')
+
+        await expect(blogElements.nth(0)).toContainText('Most liked blog')
+        await expect(blogElements.nth(1)).toContainText('Medium liked blog')
+        await expect(blogElements.nth(2)).toContainText('Least liked blog')
+      })
+    })
   })
 
   describe('When logged in as a different user', () => {
