@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, Routes, Route, useNavigate, Navigate } from 'react-router-dom'
+import { Link, Routes, Route, useNavigate, Navigate, useMatch } from 'react-router-dom'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogList from './components/BlogList'
+import BlogView from './components/BlogView'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -15,6 +16,9 @@ const App = () => {
   const [successMessage, setSuccessMessage] = useState(null)
 
   const navigate = useNavigate()
+
+  const match = useMatch('/blogs/:id')
+  const blog = match ? blogs.find(b => b.id === match.params.id) : null
 
   const blogFormRef = useRef()
 
@@ -132,10 +136,7 @@ const App = () => {
       <div>
         <Link style={padding} to="/">blogs</Link>
         {user ? (
-          <span>
-            {user.name} logged in
-            <button onClick={handleLogout}>logout</button>
-          </span>
+          <button onClick={handleLogout}>logout</button>
         ) : (
           <Link style={padding} to="/login">login</Link>
         )}
@@ -157,6 +158,14 @@ const App = () => {
         } />
         <Route path="/login" element={
           user ? <Navigate replace to="/" /> : loginForm()
+        } />
+        <Route path="/blogs/:id" element={
+          <BlogView
+            blog={blog}
+            updateBlog={updateBlog}
+            removeBlog={removeBlog}
+            currentUser={user}
+          />
         } />
       </Routes>
     </div>
