@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Routes, Route, useNavigate, Navigate, useMatch } from 'react-router-dom'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
+import BlogForm from './components/BlogForm'
 import BlogList from './components/BlogList'
 import BlogView from './components/BlogView'
 
@@ -19,8 +20,6 @@ const App = () => {
 
   const match = useMatch('/blogs/:id')
   const blog = match ? blogs.find(b => b.id === match.params.id) : null
-
-  const blogFormRef = useRef()
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -81,7 +80,6 @@ const App = () => {
   }
 
   const addBlog = async blogObject => {
-    blogFormRef.current.toggleVisibility()
     try {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
@@ -89,6 +87,7 @@ const App = () => {
       setTimeout(() => {
         setSuccessMessage(null)
       }, 5000)
+      navigate('/')
     } catch (error) {
       setErrorMessage(error.response.data.error)
       setTimeout(() => {
@@ -135,6 +134,9 @@ const App = () => {
     <div>
       <div>
         <Link style={padding} to="/">blogs</Link>
+        {user && (
+          <Link style={padding} to="/create">create new</Link>
+        )}
         {user ? (
           <button onClick={handleLogout}>logout</button>
         ) : (
@@ -150,14 +152,15 @@ const App = () => {
           <BlogList
             blogs={blogs}
             user={user}
-            blogFormRef={blogFormRef}
-            addBlog={addBlog}
             updateBlog={updateBlog}
             removeBlog={removeBlog}
           />
         } />
         <Route path="/login" element={
           user ? <Navigate replace to="/" /> : loginForm()
+        } />
+        <Route path="/create" element={
+          user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
         } />
         <Route path="/blogs/:id" element={
           <BlogView
