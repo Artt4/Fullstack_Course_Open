@@ -16,6 +16,7 @@ const LoginForm = ({
           <TextField
             label="username"
             variant="standard"
+            margin="normal"
             value={username}
             onChange={handleUsernameChange}
           />
@@ -25,11 +26,12 @@ const LoginForm = ({
             label="password"
             type="password"
             variant="standard"
+            margin="normal"
             value={password}
             onChange={handlePasswordChange}
           />
         </div>
-        <Button type="submit" variant="contained" color="primary" style={{ marginTop: 10 }}>
+        <Button type="submit" variant="contained" sx={{ mt: 1 }}>
           LOGIN
         </Button>
       </form>

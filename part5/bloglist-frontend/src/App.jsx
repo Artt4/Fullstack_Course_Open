@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, Routes, Route, useNavigate, Navigate, useMatch } from 'react-router-dom'
-import { Container } from '@mui/material'
+import { Container, AppBar, Toolbar, Button, createTheme, ThemeProvider } from '@mui/material'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
@@ -9,13 +9,20 @@ import BlogForm from './components/BlogForm'
 import BlogList from './components/BlogList'
 import BlogView from './components/BlogView'
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#006400',
+    },
+  },
+})
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [successMessage, setSuccessMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
 
   const navigate = useNavigate()
 
@@ -53,9 +60,9 @@ const App = () => {
       setPassword('')
       navigate('/')
     } catch {
-      setErrorMessage('wrong username or password')
+      setNotification({ text: 'wrong username or password', type: 'error' })
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }
@@ -71,15 +78,15 @@ const App = () => {
     try {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
-      setSuccessMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
+      setNotification({ text: `a new blog ${blogObject.title} by ${blogObject.author} added`, type: 'success' })
       setTimeout(() => {
-        setSuccessMessage(null)
+        setNotification(null)
       }, 5000)
       navigate('/')
     } catch (error) {
-      setErrorMessage(error.response.data.error)
+      setNotification({ text: error.response.data.error, type: 'error' })
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }
@@ -89,9 +96,9 @@ const App = () => {
       const returnedBlog = await blogService.update(id, blogObject)
       setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
     } catch (error) {
-      setErrorMessage(error.response.data.error)
+      setNotification({ text: error.response.data.error, type: 'error' })
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }
@@ -101,73 +108,81 @@ const App = () => {
       try {
         await blogService.remove(id)
         setBlogs(blogs.filter(blog => blog.id !== id))
-        setSuccessMessage(`Blog ${title} by ${author} removed successfully`)
+        setNotification({ text: `Blog ${title} by ${author} removed successfully`, type: 'success' })
         setTimeout(() => {
-          setSuccessMessage(null)
+          setNotification(null)
         }, 5000)
       } catch (error) {
-        setErrorMessage(error.response.data.error)
+        setNotification({ text: error.response.data.error, type: 'error' })
         setTimeout(() => {
-          setErrorMessage(null)
+          setNotification(null)
         }, 5000)
       }
     }
   }
 
-  const padding = {
-    padding: 5
-  }
+  const style = { '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }
 
   return (
-    <Container>
-      <div>
-        <Link style={padding} to="/">blogs</Link>
-        {user && (
-          <Link style={padding} to="/create">create new</Link>
-        )}
-        {user ? (
-          <button onClick={handleLogout}>logout</button>
-        ) : (
-          <Link style={padding} to="/login">login</Link>
-        )}
-      </div>
+    <ThemeProvider theme={theme}>
+      <Container>
+        <AppBar position="static" sx={{ backgroundColor: 'darkgreen' }}>
+          <Toolbar>
+            <h2>Blog App</h2>
+            <Button color="inherit" component={Link} to="/" sx={{ ...style, marginLeft: 'auto' }}>
+              blogs
+            </Button>
+            <Button color="inherit" component={Link} to="/create" sx={style}>
+              new blog
+            </Button>
+            {user ? (
+              <Button color="inherit" onClick={handleLogout} sx={style}>
+                logout
+              </Button>
+            ) : (
+              <Button color="inherit" component={Link} to="/login" sx={style}>
+                login
+              </Button>
+            )}
+          </Toolbar>
+        </AppBar>
 
-      <Notification message={successMessage} className="success" />
-      <Notification message={errorMessage} className="error" />
+        <Notification notification={notification} />
 
-      <Routes>
-        <Route path="/" element={
-          <BlogList
-            blogs={blogs}
-            user={user}
-            updateBlog={updateBlog}
-            removeBlog={removeBlog}
-          />
-        } />
-        <Route path="/login" element={
-          user ? <Navigate replace to="/" /> : (
-            <LoginForm
-              username={username}
-              password={password}
-              handleUsernameChange={({ target }) => setUsername(target.value)}
-              handlePasswordChange={({ target }) => setPassword(target.value)}
-              handleLogin={handleLogin}
+        <Routes>
+          <Route path="/" element={
+            <BlogList
+              blogs={blogs}
+              user={user}
+              updateBlog={updateBlog}
+              removeBlog={removeBlog}
             />
-          )
-        } />
-        <Route path="/create" element={
-          user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
-        } />
-        <Route path="/blogs/:id" element={
-          <BlogView
-            blog={blog}
-            updateBlog={updateBlog}
-            removeBlog={removeBlog}
-            currentUser={user}
-          />
-        } />
-      </Routes>
-    </Container>
+          } />
+          <Route path="/login" element={
+            user ? <Navigate replace to="/" /> : (
+              <LoginForm
+                username={username}
+                password={password}
+                handleUsernameChange={({ target }) => setUsername(target.value)}
+                handlePasswordChange={({ target }) => setPassword(target.value)}
+                handleLogin={handleLogin}
+              />
+            )
+          } />
+          <Route path="/create" element={
+            user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
+          } />
+          <Route path="/blogs/:id" element={
+            <BlogView
+              blog={blog}
+              updateBlog={updateBlog}
+              removeBlog={removeBlog}
+              currentUser={user}
+            />
+          } />
+        </Routes>
+      </Container>
+    </ThemeProvider>
   )
 }
 
