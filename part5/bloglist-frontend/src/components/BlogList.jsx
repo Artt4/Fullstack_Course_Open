@@ -5,7 +5,7 @@ const BlogList = ({ blogs, user, updateBlog, removeBlog }) => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <h2>Blogs</h2>
       <ul>
         {sortedBlogs.map(blog =>
           <li key={blog.id}>

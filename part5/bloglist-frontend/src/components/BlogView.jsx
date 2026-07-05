@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { Card, CardContent, Typography, IconButton, Link, Box } from '@mui/material'
+import ThumbUpIcon from '@mui/icons-material/ThumbUp'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const BlogView = ({ blog, updateBlog, removeBlog, currentUser }) => {
   const navigate = useNavigate()
@@ -28,22 +31,37 @@ const BlogView = ({ blog, updateBlog, removeBlog, currentUser }) => {
   const showRemoveButton = blog.user && currentUser && blog.user.username === currentUser.username
 
   return (
-    <div>
-      <h2>{blog.title}</h2>
-      <div>
-        <a href={blog.url}>{blog.url}</a>
-      </div>
-      <div>
-        {blog.likes} likes
-        {currentUser && (
-          <button onClick={handleLike}>like</button>
-        )}
-      </div>
-      <div>added by {blog.user?.name}</div>
-      {showRemoveButton && (
-        <button onClick={handleRemove}>remove</button>
-      )}
-    </div>
+    <Card sx={{ maxWidth: 600, marginTop: 3 }}>
+      <CardContent>
+        <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold' }}>
+          {blog.title}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+          by {blog.author}
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          <Link href={blog.url} target="_blank" rel="noreferrer">
+            {blog.url}
+          </Link>
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Added by {blog.user?.name}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+          <Typography variant="body2">{blog.likes} likes</Typography>
+          {currentUser && (
+            <IconButton size="small" color="primary" onClick={handleLike}>
+              <ThumbUpIcon />
+            </IconButton>
+          )}
+          {showRemoveButton && (
+            <IconButton size="small" color="error" onClick={handleRemove}>
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </Box>
+      </CardContent>
+    </Card>
   )
 }
 
