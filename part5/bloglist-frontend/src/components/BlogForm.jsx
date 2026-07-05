@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TextField, Button } from '@mui/material'
 
 const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('')
@@ -18,39 +19,44 @@ const BlogForm = ({ createBlog }) => {
   }
 
   return (
-    <form onSubmit={addBlog}>
-      <div>
-        title:
-        <input
-          type="text"
-          value={title}
-          name="Title"
-          onChange={event => setTitle(event.target.value)}
-          placeholder='enter blog title'
-        />
-      </div>
-      <div>
-        author:
-        <input
-          type="text"
-          value={author}
-          name="Author"
-          onChange={event => setAuthor(event.target.value)}
-          placeholder='enter blog author'
-        />
-      </div>
-      <div>
-        url:
-        <input
-          type="text"
-          value={url}
-          name="Url"
-          onChange={({ target }) => setUrl(target.value)}
-          placeholder='enter blog url'
-        />
-      </div>
-      <button type="submit">create</button>
-    </form>
+    <div>
+      <h2 style={{ marginTop: 30 }}>Create new</h2>
+      <form onSubmit={addBlog}>
+        <div>
+          <TextField
+            label="title"
+            margin="normal"
+            size="small"
+            sx={{ width: '400px' }}
+            value={title}
+            onChange={event => setTitle(event.target.value)}
+          />
+        </div>
+        <div>
+          <TextField
+            label="author"
+            margin="normal"
+            size="small"
+            sx={{ width: '400px' }}
+            value={author}
+            onChange={event => setAuthor(event.target.value)}
+          />
+        </div>
+        <div>
+          <TextField
+            label="url"
+            margin="normal"
+            size="small"
+            sx={{ width: '400px' }}
+            value={url}
+            onChange={({ target }) => setUrl(target.value)}
+          />
+        </div>
+        <Button type="submit" variant="contained" color="primary">
+          CREATE
+        </Button>
+      </form>
+    </div>
   )
 }
 

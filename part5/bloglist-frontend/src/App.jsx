@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, Routes, Route, useNavigate, Navigate, useMatch } from 'react-router-dom'
+import { Container } from '@mui/material'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
@@ -37,19 +38,6 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
-
-  const loginForm = () => (
-    <div>
-      <h2>Log in to application</h2>
-      <LoginForm
-        username={username}
-        password={password}
-        handleUsernameChange={({ target }) => setUsername(target.value)}
-        handlePasswordChange={({ target }) => setPassword(target.value)}
-        handleLogin={handleLogin}
-      />
-    </div>
-  )
 
   const handleLogin = async event => {
     event.preventDefault()
@@ -131,7 +119,7 @@ const App = () => {
   }
 
   return (
-    <div>
+    <Container>
       <div>
         <Link style={padding} to="/">blogs</Link>
         {user && (
@@ -157,7 +145,15 @@ const App = () => {
           />
         } />
         <Route path="/login" element={
-          user ? <Navigate replace to="/" /> : loginForm()
+          user ? <Navigate replace to="/" /> : (
+            <LoginForm
+              username={username}
+              password={password}
+              handleUsernameChange={({ target }) => setUsername(target.value)}
+              handlePasswordChange={({ target }) => setPassword(target.value)}
+              handleLogin={handleLogin}
+            />
+          )
         } />
         <Route path="/create" element={
           user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
@@ -171,7 +167,7 @@ const App = () => {
           />
         } />
       </Routes>
-    </div>
+    </Container>
   )
 }
 
