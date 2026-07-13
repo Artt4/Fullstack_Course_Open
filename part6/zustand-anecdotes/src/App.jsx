@@ -1,13 +1,16 @@
 
 import { useAnecdotes, useAnecdoteActions } from './store'
+import AnecdoteForm from './components/AnecdoteForm'
 
 const App = () => {
   const anecdotes = useAnecdotes()
-  const actions = useAnecdoteActions()
+  const { likesCounter } = useAnecdoteActions()
+
 
   const vote = id => {
     console.log('vote', id)
-    actions.likesCounter(id)
+    likesCounter(id)
+
   }
 
   return (
@@ -22,13 +25,7 @@ const App = () => {
           </div>
         </div>
       ))}
-      <h2>create new</h2>
-      <form>
-        <div>
-          <input />
-        </div>
-        <button>create</button>
-      </form>
+      <AnecdoteForm />
     </div>
   )
 }
