@@ -31,19 +31,14 @@
       "votes": 2
     },
     {
-      "content": "tests",
-      "votes": 18,
-      "id": "B4SfhhxxG2E"
-    },
-    {
       "content": "testing notif",
       "votes": 2,
       "id": "YP7OINuZ1hE"
     },
     {
-      "content": "testing notif",
+      "content": "This anecdote has zero votes",
       "votes": 0,
-      "id": "6IF60-ypX9s"
+      "id": "i__cLFkpTmg"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

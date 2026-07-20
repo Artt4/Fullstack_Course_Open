@@ -3,7 +3,7 @@ import { useNotificationAction } from '../notificationStore'
 
 
 const AnecdoteList = () => {
-  const { likesCounter } = useAnecdoteActions()
+  const { likesCounter, remove } = useAnecdoteActions()
   const anecdotes = useAnecdotes()
   const notify = useNotificationAction()
 
@@ -14,6 +14,11 @@ const AnecdoteList = () => {
     notify(`You voted '${anecdote.content}'`)
   }
 
+  const handleDelete = anecdote => {
+      remove(anecdote.id)
+      notify(`You deleted '${anecdote.content}'`)
+    }
+
   return (
     <div>
       {sortedAnecdotes.map(anecdote => (
@@ -22,6 +27,9 @@ const AnecdoteList = () => {
           <div>
             has {anecdote.votes}
             <button onClick={() => vote(anecdote)}>vote</button>
+            {anecdote.votes === 0 && (
+              <button onClick={() => handleDelete(anecdote)}>delete</button>
+            )}
           </div>
         </div>
       ))}
