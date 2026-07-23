@@ -23,6 +23,7 @@ describe('useAnecdoteActions', () => {
       { id: '1', content: 'If it hurts, do it more often', votes: 0 },
       { id: '2', content: 'Adding manpower to a late software project makes it later!', votes: 0 }
     ]
+
     anecdoteService.getAll.mockResolvedValue(mockAnecdotes)
 
     const { result } = renderHook(() => useAnecdoteActions())
@@ -34,6 +35,25 @@ describe('useAnecdoteActions', () => {
     const { result: anecdotesResult } = renderHook(() => useAnecdotes())
     expect(anecdotesResult.current).toEqual(mockAnecdotes)
   })
+
+  it('likesCounter increases the votes of the anecdote', async () => {
+    const anecdote = { id: '1', content: 'This one is about REDUX', votes: 5 }
+
+    useAnecdoteStore.setState({ anecdotes: [anecdote] })
+    anecdoteService.update.mockResolvedValue({ ...anecdote, votes: 6 })
+
+    const { result } = renderHook(() => useAnecdoteActions())
+
+    await act(async () => {
+      await result.current.likesCounter('1')
+    })
+
+    const { result: anecdotesResult } = renderHook(() => useAnecdotes())
+    expect(anecdotesResult.current[0].votes).toBe(6)
+  })
+})
+
+describe('useAnecdotes', () => {
   it('returns anecdotes sorted by votes', () => {
     const unsortedAnecdotes = [
       { id: '1', content: 'Low votes', votes: 1 },
@@ -49,7 +69,8 @@ describe('useAnecdoteActions', () => {
     expect(result.current[1].votes).toBe(5)
     expect(result.current[2].votes).toBe(1)
   })
-  describe('useAnecdotes filtering', () => {
+
+  describe('filtering', () => {
     const mockAnecdotes = [
       { id: '1', content: 'This one is about REDUX', votes: 5 },
       { id: '2', content: 'This is about Zustand', votes: 10 },
@@ -62,6 +83,7 @@ describe('useAnecdoteActions', () => {
 
     it('returns all anecdotes when the filter is empty', () => {
       const { result } = renderHook(() => useAnecdotes())
+
       expect(result.current).toHaveLength(3)
     })
 
