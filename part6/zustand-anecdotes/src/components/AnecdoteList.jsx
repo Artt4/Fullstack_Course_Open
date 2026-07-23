@@ -7,7 +7,7 @@ const AnecdoteList = () => {
   const anecdotes = useAnecdotes()
   const notify = useNotificationAction()
 
-  const sortedAnecdotes = anecdotes.toSorted((a, b) => b.votes - a.votes)
+  //const sortedAnecdotes = anecdotes.toSorted((a, b) => b.votes - a.votes)
 
   const vote = anecdote => {
     likesCounter(anecdote.id)
@@ -21,7 +21,7 @@ const AnecdoteList = () => {
 
   return (
     <div>
-      {sortedAnecdotes.map(anecdote => (
+      {anecdotes.map(anecdote => (
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
           <div>
