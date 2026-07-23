@@ -45,3 +45,5 @@ export const useAnecdotes = () => {
   return anecdotes
 }
 export const useAnecdoteActions = () => useAnecdoteStore((state) => state.actions)
+
+export default useAnecdoteStore
