@@ -3,7 +3,8 @@ const baseUrl = 'http://localhost:3001/anecdotes'
 export const getAnecdotes = async () => {
   const response = await fetch(baseUrl)
   if (!response.ok) {
-    throw new Error('Failed to fetch anecdontes')
+    const error = await response.json()
+    throw new Error(error.error)
   }
   return await response.json()
 }
@@ -17,7 +18,8 @@ export const createAnecdote = async (newAnecdote) => {
   const response = await fetch(baseUrl, options)
 
   if (!response.ok) {
-    throw new Error('Failed to create anecdote')
+    const error = await response.json()
+    throw new Error(error.error)
   }
 
   return await response.json()
